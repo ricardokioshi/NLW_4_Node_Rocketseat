@@ -1,10 +1,12 @@
 import request from 'supertest';
+import { getConnection } from 'typeorm';
 import { app } from '../app';
 
 
 import createConnection from '../database'
 
 describe("Surveys", () => {
+    // Antes de tudo, criar as migrations para o banco de dados test ter tabelas
     beforeAll(async () => {
         const connection = await createConnection();
         try {
@@ -13,6 +15,13 @@ describe("Surveys", () => {
             console.log("Migration already up-to-date")
         }
     });
+
+        // Para excluir o banco de dados fake
+        afterAll(async () => {
+            const connection = getConnection();
+            await connection.dropDatabase();
+            await connection.close();
+        });
 
     it("Should be able to create a new survey", async () => {
         const response = await request(app).post("/surveys").send({
